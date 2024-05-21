@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Sender & Receiver</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      h1 {
+        text-align: center;
+      }
+      form {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        resize: vertical;
+      }
+      button[type="submit"] {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        float: right;
+      }
+      button[type="submit"]:hover {
+        background-color: #45a049;
+      }
+      #response {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Email Sender & Receiver</h1>
+
+    <div style="width: 45%; float: left">
+      <h2>Email Sender</h2>
+      <form id="send-email-form">
+        <label for="email-text">Email Text:</label>
+        <textarea
+          id="email-text"
+          name="email-text"
+          rows="4"
+          cols="50"
+        ></textarea
+        ><br />
+        <button type="submit">Send Email</button>
+      </form>
+    </div>
+
+    <div style="width: 45%; float: right">
+      <h2>Email Receiver</h2>
+      <form id="receive-email-form">
+        <label for="received-text">Received Text:</label>
+        <textarea
+          id="received-text"
+          name="received-text"
+          rows="4"
+          cols="50"
+        ></textarea
+        ><br />
+        <label for="signature">Signature:</label>
+        <input type="text" id="signature" name="signature" /><br />
+        <button type="submit">Receive Email</button>
+      </form>
+    </div>
+
+    <div style="clear: both"></div>
+
+    <div id="response"></div>
+
+    <!-- JavaScript section -->
+    <script>
+      // Function to send email
+      async function sendEmail(event) { 
+        event.preventDefault(); //Prevent default form submission
+        const emailText = document.getElementById("email-text").value; // Gets the email text from the input field
+        const signature = ""; // As signature is not needed for sending emails
+        const data = { text: emailText, signature: signature }; // Prepare the data to send
+        const response = await fetch("/send-email/", { // Sends a POST request to the '/send-email/' endpoint
+          method: "POST", // Use the POST method to send data
+          headers: {
+            "Content-Type": "application/json", // Specify that we're sending JSON data
+          },
+          body: JSON.stringify(data), // Convert our data to JSON format
+        });
+        const result = await response.json(); // Get the response from the server and parse it as JSON
+        alert(result.message); // Show a pop-up message with the response from the server
+      }
+
+      // Function to receive email
+      async function receiveEmail(event) {
+        event.preventDefault(); //Prevent default form submission
+        const receivedText = document.getElementById("received-text").value; // Get the text received in the email textarea
+        const signature = document.getElementById("signature").value; // Get the signature entered by the user
+        const response = await fetch(`/receive-email`, { // Send a POST request to the /receive-email endpoint
+          method: "POST", // Use the POST method to send data
+          headers: {
+            "Content-Type": "application/json", // Specify that we're sending JSON data
+          },
+          body: JSON.stringify({ text: receivedText, signature: signature }), // Convert our data to JSON format
+        });
+        const result = await response.json(); // Get the response from the server and parse it as JSON
+        document.getElementById("response").innerText = JSON.stringify(result); // Display the response from the server
+      }
+
+      // Add event listeners to the forms to call the appropriate functions when they're submitted
+      document
+        .getElementById("send-email-form")
+        .addEventListener("submit", sendEmail); // Listen for the submit event on the send-email form
+      document
+        .getElementById("receive-email-form")
+        .addEventListener("submit", receiveEmail); // Listen for the submit event on the receive-email form
+    </script>
+  </body>
+</html>
